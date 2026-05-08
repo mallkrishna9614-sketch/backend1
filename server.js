@@ -5,28 +5,58 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-const authRoutes = require("./backend/routes/authRoutes");
-const orderRoutes = require("./backend/routes/orderRoutes");
+const authRoutes =
+    require("./backend/routes/authRoutes");
+
+const orderRoutes =
+    require("./backend/routes/orderRoutes");
 
 const app = express();
 
-app.use(cors());
+// CORS
+app.use(cors({
+    origin: "*"
+}));
+
 app.use(express.json());
 
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Connected"))
-  .catch((err) => console.log(err));
+// MongoDB Connection
+mongoose.connect(process.env.MONGO_URI, {
 
-app.use("/api/auth", authRoutes);
-app.use("/api/orders", orderRoutes);
+})
+.then(() => {
 
-app.get("/", (req, res) => {
-  res.send("LPU Canteen Backend Running");
+    console.log("MongoDB Connected");
+
+})
+.catch((err) => {
+
+    console.log("MongoDB Error:", err);
+
 });
 
-const PORT = process.env.PORT || 5000;
+// Routes
+app.use("/api/auth", authRoutes);
+
+app.use("/api/orders", orderRoutes);
+
+// Test Route
+app.get("/", (req, res) => {
+
+    res.send(
+        "LPU Canteen Backend Running"
+    );
+
+});
+
+// Start Server
+const PORT =
+    process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+
+    console.log(
+        `Server running on port ${PORT}`
+    );
+
 });
