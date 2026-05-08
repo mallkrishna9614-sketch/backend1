@@ -1,27 +1,15 @@
 const Order = require("../models/Order");
-const updateOrderStatus = async (
-    req,
-    res
-) => {
+
+// GET ALL ORDERS
+const getOrders = async (req, res) => {
 
     try {
 
-        const order =
-            await Order.findByIdAndUpdate(
+        const orders =
+            await Order.find()
+            .sort({ createdAt: -1 });
 
-                req.params.id,
-
-                {
-                    orderStatus:
-                        req.body.orderStatus
-                },
-
-                {
-                    new: true
-                }
-            );
-
-        res.status(200).json(order);
+        res.json(orders);
 
     } catch (error) {
 
@@ -32,74 +20,64 @@ const updateOrderStatus = async (
     }
 };
 
+// CREATE ORDER
 const createOrder = async (req, res) => {
-  try {
 
-    const {
-      studentName,
-      registrationNumber,
-      canteen,
-      items,
-      totalAmount,
-      pickupSlot,
-      orderType,
-    } = req.body;
+    try {
 
-    const tokenNumber =
-      "LPU" + Math.floor(1000 + Math.random() * 9000);
+        const newOrder =
+            new Order(req.body);
 
-    const order = await Order.create({
-      studentName,
-      registrationNumber,
-      canteen,
-      items,
-      totalAmount,
-      pickupSlot,
-      orderType,
-      tokenNumber,
-    });
+        const savedOrder =
+            await newOrder.save();
 
-    res.status(201).json({
-      message: "Order Placed Successfully",
-      tokenNumber,
-      order,
-    });
+        res.status(201).json(savedOrder);
 
-  } catch (error) {
+    } catch (error) {
 
-    res.status(500).json({
-      message: error.message,
-    });
+        res.status(500).json({
+            message: error.message
+        });
 
-  }
+    }
 };
 
-const getOrders = async (req, res) => {
+// UPDATE ORDER STATUS
+const updateOrderStatus =
+async (req, res) => {
 
-  try {
+    try {
 
-    const orders = await Order.find().sort({
-      createdAt: -1,
-    });
+        const { status } = req.body;
 
-    res.status(200).json(orders);
+        const updatedOrder =
+            await Order.findByIdAndUpdate(
 
-  } catch (error) {
+                req.params.id,
 
-    res.status(500).json({
-      message: error.message,
-    });
+                { status },
 
-  }
+                { new: true }
 
+            );
+
+        res.json(updatedOrder);
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
 };
 
 module.exports = {
-  createOrder,
-  getOrders,
-};
-module.exports = {
-    createOrder,
+
     getOrders,
+
+    createOrder,
+
     updateOrderStatus
+
 };
