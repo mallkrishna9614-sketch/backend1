@@ -1,5 +1,23 @@
 const mongoose = require("mongoose");
 
+// Full order lifecycle as defined in the system spec
+const ORDER_STATUSES = [
+  "Pending",
+  "Accepted",
+  "Preparing",
+  "Ready for Pickup",
+  "Picked Up",
+  "Completed",
+];
+
+// Active statuses — shown on the live dashboard
+const ACTIVE_STATUSES = [
+  "Pending",
+  "Accepted",
+  "Preparing",
+  "Ready for Pickup",
+];
+
 const orderSchema = new mongoose.Schema(
   {
     studentName: {
@@ -12,6 +30,8 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    // Determines which canteen staff can see this order.
+    // Must match Staff.assignedCanteen exactly.
     canteen: {
       type: String,
       required: true,
@@ -49,18 +69,31 @@ const orderSchema = new mongoose.Schema(
 
     orderStatus: {
       type: String,
-      enum: ["Preparing", "Ready", "Completed"],
-      default: "Preparing",
+      enum: ORDER_STATUSES,
+      default: "Pending",
     },
 
     tokenNumber: {
       type: String,
       required: true,
     },
+
+    // Set when order transitions to "Completed" — used in history queries
+    completedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,
   }
 );
+
+// Compound index for efficient canteen-scoped filtered queries
+orderSchema.index({ canteen: 1, orderStatus: 1, createdAt: -1 });
+
+// Export status arrays so controllers can import them
+orderSchema.statics.ACTIVE_STATUSES = ACTIVE_STATUSES;
+orderSchema.statics.ORDER_STATUSES = ORDER_STATUSES;
 
 module.exports = mongoose.model("Order", orderSchema);

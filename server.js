@@ -5,58 +5,48 @@ const dotenv = require("dotenv");
 
 dotenv.config();
 
-const authRoutes =
-    require("./backend/routes/authRoutes");
-
-const orderRoutes =
-    require("./backend/routes/orderRoutes");
+// ─── ROUTES ───────────────────────────────────────────────────────────────────
+const authRoutes = require("./backend/routes/authRoutes");       // Student auth
+const orderRoutes = require("./backend/routes/orderRoutes");     // Student orders
+const staffRoutes = require("./backend/routes/staffRoutes");     // Staff (protected)
+const publicMenuRoutes = require("./backend/routes/publicMenuRoutes"); // Public menu + canteens
 
 const app = express();
 
-// CORS
-app.use(cors({
-    origin: "*"
-}));
-
+// ─── CORS ─────────────────────────────────────────────────────────────────────
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, {
-
-})
-.then(() => {
-
+// ─── MONGODB CONNECTION ───────────────────────────────────────────────────────
+mongoose
+  .connect(process.env.MONGO_URI)
+  .then(() => {
     console.log("MongoDB Connected");
-
-})
-.catch((err) => {
-
+  })
+  .catch((err) => {
     console.log("MongoDB Error:", err);
+  });
 
-});
-
-// Routes
+// ─── STUDENT ROUTES (unchanged) ───────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
-
 app.use("/api/orders", orderRoutes);
 
-// Test Route
+// ─── STAFF ROUTES (all protected via JWT middleware in staffRoutes.js) ─────────
+app.use("/api/staff", staffRoutes);
+
+// ─── PUBLIC ROUTES ────────────────────────────────────────────────────────────
+// GET /api/menu?canteen=Coffee Day   → public student-facing menu
+// GET /api/canteens                  → list all canteens + status
+app.use("/api", publicMenuRoutes);
+
+// ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
-
-    res.send(
-        "LPU Canteen Backend Running"
-    );
-
+  res.send("LPU Canteen Backend Running — Multi-Canteen v2.0");
 });
 
-// Start Server
-const PORT =
-    process.env.PORT || 5000;
+// ─── START SERVER ─────────────────────────────────────────────────────────────
+const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-
-    console.log(
-        `Server running on port ${PORT}`
-    );
-
+  console.log(`Server running on port ${PORT}`);
 });

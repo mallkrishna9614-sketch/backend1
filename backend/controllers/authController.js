@@ -4,17 +4,9 @@ const jwt = require("jsonwebtoken");
 
 const registerUser = async (req, res) => {
   try {
-    const {
-    name,
-    registrationNumber,
-    email,
-    password,
-    role
-} = req.body;
+    const { name, registrationNumber, email, password, role } = req.body;
 
-    const userExists = await User.findOne({
-      registrationNumber,
-    });
+    const userExists = await User.findOne({ registrationNumber });
 
     if (userExists) {
       return res.status(400).json({
@@ -25,12 +17,12 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-    name,
-    registrationNumber,
-    email,
-    password: hashedPassword,
-    role,
-});
+      name,
+      registrationNumber,
+      email,
+      password: hashedPassword,
+      role,
+    });
 
     res.status(201).json({
       message: "User Registered Successfully",
@@ -45,30 +37,25 @@ const registerUser = async (req, res) => {
 
 const loginUser = async (req, res) => {
   try {
-    const { registrationNumber, password,role } = req.body;
+    const { registrationNumber, password, role } = req.body;
 
-    const user = await User.findOne({
-      registrationNumber,
-    });
+    // FIX: Find the user first before any checks
+    const user = await User.findOne({ registrationNumber });
 
     if (!user) {
-        if (user.role !== role) {
-
-    return res.status(401).json({
-        message:
-            "Unauthorized role access",
-    });
-
-}
       return res.status(400).json({
         message: "Invalid Credentials",
       });
     }
 
-    const isMatch = await bcrypt.compare(
-      password,
-      user.password
-    );
+    // FIX: Role check is now AFTER we confirm user exists (was inside !user block before)
+    if (role && user.role !== role) {
+      return res.status(401).json({
+        message: "Unauthorized role access",
+      });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({
@@ -79,6 +66,7 @@ const loginUser = async (req, res) => {
     const token = jwt.sign(
       {
         id: user._id,
+        role: user.role,
       },
       process.env.JWT_SECRET,
       {
