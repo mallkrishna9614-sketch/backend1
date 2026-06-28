@@ -32,7 +32,7 @@ const CANTEEN_STAFF_DATA = [
     staff: {
       name: "Oven Xpress Staff",
       email: "ovenxpress@lpu.in",
-      username: "OverXpress",   // Login ID exactly as specified
+      username: "9621",   // Login ID
       password: "12345678",
     },
     sampleMenu: [
@@ -60,7 +60,7 @@ const CANTEEN_STAFF_DATA = [
     staff: {
       name: "Kitchenette Staff",
       email: "kitchenette@lpu.in",
-      username: "Food",          // Login ID exactly as specified
+      username: "9305",          // Login ID
       password: "1212",
     },
     sampleMenu: [
@@ -86,7 +86,7 @@ const CANTEEN_STAFF_DATA = [
     staff: {
       name: "Tea Point Staff",
       email: "teapoint@lpu.in",
-      username: "Teaislove",    // Login ID exactly as specified
+      username: "8896",    // Login ID
       password: "Tea",
     },
     sampleMenu: [
@@ -112,7 +112,7 @@ const CANTEEN_STAFF_DATA = [
     staff: {
       name: "Coffee Day Staff",
       email: "coffeeday@lpu.in",
-      username: "Coffee",       // Login ID exactly as specified
+      username: "9955",       // Login ID
       password: "coffee",
     },
     sampleMenu: [
@@ -138,7 +138,7 @@ const CANTEEN_STAFF_DATA = [
     staff: {
       name: "Fresh Juice Staff",
       email: "freshjuice@lpu.in",
-      username: "juice",         // Login ID exactly as specified
+      username: "1961",         // Login ID
       password: "fresh",
     },
     sampleMenu: [
