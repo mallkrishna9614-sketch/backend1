@@ -1,15 +1,30 @@
 const Razorpay = require("razorpay");
 
-/**
- * Singleton Razorpay instance.
- * Initialized from environment variables — key secret is NEVER exposed to clients.
- *
- * Razorpay Test Mode keys start with: rzp_test_
- * Get them from: https://dashboard.razorpay.com → Settings → API Keys → Test Mode
- */
-const razorpayInstance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
+let razorpayInstance = null;
 
-module.exports = razorpayInstance;
+/**
+ * Returns the initialized Razorpay singleton instance.
+ * Lazy initialized to prevent server startup crashes if environment variables
+ * are not set at deployment time.
+ */
+const getRazorpayInstance = () => {
+  const key_id = process.env.RAZORPAY_KEY_ID;
+  const key_secret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!key_id || !key_secret) {
+    throw new Error("Razorpay keys (RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET) are missing from environment variables.");
+  }
+
+  if (!razorpayInstance) {
+    razorpayInstance = new Razorpay({
+      key_id,
+      key_secret,
+    });
+  }
+
+  return razorpayInstance;
+};
+
+module.exports = {
+  getRazorpayInstance
+};

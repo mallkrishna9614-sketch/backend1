@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-const razorpay = require("../../config/razorpay");
+const { getRazorpayInstance } = require("../../config/razorpay");
 const Payment = require("../../models/Payment");
 const Order = require("../models/Order");
 
@@ -68,6 +68,7 @@ const createRazorpayOrder = async (req, res) => {
     // Razorpay expects amount in paise (₹1 = 100 paise)
     const receipt = `rcpt_${registrationNumber}_${Date.now()}`;
 
+    const razorpay = getRazorpayInstance();
     const razorpayOrder = await razorpay.orders.create({
       amount: Math.round(amount * 100), // Convert rupees → paise
       currency: "INR",
@@ -103,6 +104,9 @@ const createRazorpayOrder = async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 const verifyPayment = async (req, res) => {
   try {
+    // Ensure Razorpay configuration is valid
+    getRazorpayInstance();
+
     const {
       // Razorpay callback fields
       razorpay_payment_id,
