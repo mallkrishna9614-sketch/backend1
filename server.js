@@ -10,6 +10,7 @@ const authRoutes = require("./backend/routes/authRoutes");       // Student auth
 const orderRoutes = require("./backend/routes/orderRoutes");     // Student orders
 const staffRoutes = require("./backend/routes/staffRoutes");     // Staff (protected)
 const publicMenuRoutes = require("./backend/routes/publicMenuRoutes"); // Public menu + canteens
+const paymentRoutes = require("./backend/routes/paymentRoutes"); // Razorpay payment
 
 const app = express();
 
@@ -38,6 +39,11 @@ app.use("/api/staff", staffRoutes);
 // GET /api/menu?canteen=Coffee Day   → public student-facing menu
 // GET /api/canteens                  → list all canteens + status
 app.use("/api", publicMenuRoutes);
+
+// ─── PAYMENT ROUTES (Razorpay Test Mode) ─────────────────────────────────────
+// POST /api/payment/create-order     → generate Razorpay order
+// POST /api/payment/verify           → verify signature + create order
+app.use("/api/payment", paymentRoutes);
 
 // ─── HEALTH CHECK ─────────────────────────────────────────────────────────────
 app.get("/", (req, res) => {
