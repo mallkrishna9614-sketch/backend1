@@ -17,10 +17,10 @@ const loginStaff = async (req, res) => {
       });
     }
 
-    // Allow login by either email or username
+    // Allow login by email or username (case-insensitive)
     const query = email
       ? { email: email.toLowerCase() }
-      : { username: username.toLowerCase() };
+      : { username: { $regex: new RegExp(`^${username}$`, "i") } };
 
     const staff = await Staff.findOne(query);
 
