@@ -17,6 +17,7 @@ router.get("/", getOrders);
 
 // CREATE ORDER
 router.post("/", createOrder);
+router.post("/create", createOrder);
 
 // UPDATE STATUS
 router.put("/:id", updateOrderStatus);

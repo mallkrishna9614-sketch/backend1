@@ -184,13 +184,14 @@ const verifyPayment = async (req, res) => {
     // ── Generate token number ───────────────────────────────────────────────
     const tokenNumber = generateToken(canteen);
 
-    // ── Create Order document ───────────────────────────────────────────────
+    // ─── Create Order document ───────────────────────────────────────────────
     const newOrder = new Order({
       studentName: studentName.trim(),
       registrationNumber: registrationNumber.trim(),
       canteen: canteen.trim(),
       items,
       totalAmount: amount,
+      total: amount,
       pickupSlot: pickupSlot.trim(),
       orderType: orderType || "Takeaway",
       paymentStatus: "Paid",
@@ -199,6 +200,11 @@ const verifyPayment = async (req, res) => {
     });
 
     const savedOrder = await newOrder.save();
+
+    // Requirement 6: backend logging when creating an order
+    console.log("NEW ORDER");
+    console.log("Canteen:");
+    console.log(savedOrder.canteen);
 
     // ── Create Payment record ───────────────────────────────────────────────
     const payment = new Payment({

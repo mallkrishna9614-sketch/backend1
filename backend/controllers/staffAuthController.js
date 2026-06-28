@@ -49,6 +49,7 @@ const loginStaff = async (req, res) => {
       {
         id: staff._id,
         role: "staff",
+        username: staff.username,
         assignedCanteen: staff.assignedCanteen,
       },
       process.env.JWT_SECRET,
@@ -60,6 +61,8 @@ const loginStaff = async (req, res) => {
     res.status(200).json({
       message: "Login successful.",
       token,
+      username: username || staff.username,
+      assignedCanteen: staff.assignedCanteen,
       staff: {
         id: staff._id,
         name: staff.name,

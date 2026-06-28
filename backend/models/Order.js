@@ -50,6 +50,11 @@ const orderSchema = new mongoose.Schema(
       required: true,
     },
 
+    total: {
+      type: Number,
+      required: true,
+    },
+
     pickupSlot: {
       type: String,
       required: true,

@@ -27,12 +27,50 @@ const getActiveOrders = async (req, res) => {
   try {
     const { assignedCanteen } = req.user;
 
-    const orders = await Order.find({
+    // Retrieve the staff's username (from JWT, with fallback to DB lookup)
+    let username = req.user.username;
+    if (!username) {
+      const Staff = require("../../models/Staff");
+      const staffObj = await Staff.findById(req.user.id);
+      if (staffObj) {
+        username = staffObj.username;
+      }
+    }
+    if (!username) {
+      username = "Unknown Staff";
+    }
+
+    // Requirement 4: filter where orderStatus !== "Completed"
+    const query = {
       canteen: assignedCanteen,
-      orderStatus: { $in: ACTIVE_STATUSES },
-    })
+      orderStatus: {
+        $ne: "Completed",
+      },
+    };
+
+    const orders = await Order.find(query)
       .sort({ createdAt: -1 })
       .lean();
+
+    // Requirement 6: Backend logging when fetching orders
+    console.log("Staff:");
+    console.log(username);
+    console.log("");
+    console.log("Assigned Store:");
+    console.log(assignedCanteen);
+    console.log("");
+    console.log("Orders Found:");
+    console.log(orders.length);
+
+    // Requirement 7: If no orders are returned, print details
+    if (orders.length === 0) {
+      console.log("* Logged-in staff:", username);
+      console.log("* assignedCanteen:", assignedCanteen);
+      // Fetch all distinct canteen values present in the orders collection
+      const orderCanteenValues = await Order.distinct("canteen");
+      console.log("* Order canteen values:", orderCanteenValues);
+      console.log("* MongoDB query used:", JSON.stringify(query));
+    }
 
     res.status(200).json({ orders });
   } catch (error) {

@@ -25,8 +25,42 @@ const getOrders = async (req, res) => {
 // CREATE ORDER (student-facing)
 const createOrder = async (req, res) => {
   try {
-    const newOrder = new Order(req.body);
+    const orderData = { ...req.body };
+
+    // Ensure both total and totalAmount are populated
+    if (orderData.totalAmount !== undefined && orderData.total === undefined) {
+      orderData.total = orderData.totalAmount;
+    } else if (orderData.total !== undefined && orderData.totalAmount === undefined) {
+      orderData.totalAmount = orderData.total;
+    }
+
+    // Default status values
+    if (!orderData.paymentStatus) {
+      orderData.paymentStatus = "Paid";
+    }
+    if (!orderData.orderStatus) {
+      orderData.orderStatus = "Pending";
+    }
+
+    // Generate token number if missing
+    if (!orderData.tokenNumber) {
+      const canteenVal = orderData.canteen || "GEN";
+      const prefix = canteenVal
+        .replace(/\s+/g, "")
+        .substring(0, 3)
+        .toUpperCase();
+      const timestamp = Date.now().toString().slice(-5);
+      orderData.tokenNumber = `TKN-${prefix}-${timestamp}`;
+    }
+
+    const newOrder = new Order(orderData);
     const savedOrder = await newOrder.save();
+
+    // Requirement 6: backend logging when creating an order
+    console.log("NEW ORDER");
+    console.log("Canteen:");
+    console.log(savedOrder.canteen);
+
     res.status(201).json(savedOrder);
   } catch (error) {
     res.status(500).json({
