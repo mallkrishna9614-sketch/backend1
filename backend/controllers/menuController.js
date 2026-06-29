@@ -1,4 +1,5 @@
 const Menu = require("../../models/Menu");
+const Canteen = require("../../models/Canteen");
 
 /**
  * GET /api/staff/menu
@@ -107,19 +108,39 @@ const addMenuItem = async (req, res) => {
  */
 const getPublicMenu = async (req, res) => {
   try {
-    const { canteen } = req.query;
+    const requestedCanteen = req.params.canteen || req.query.canteen;
 
-    if (!canteen) {
+    if (!requestedCanteen) {
       return res.status(400).json({
-        message: "Query param ?canteen is required.",
+        message: "Canteen parameter is required (either as path parameter /menu/:canteen or query param ?canteen=...).",
       });
     }
 
-    const items = await Menu.find({ canteen, isAvailable: true })
+    // Resolve flexible canteen name (e.g., "Fresh Juice" -> "The Fresh Juice")
+    let resolvedCanteen = requestedCanteen.trim();
+    try {
+      const normalizedQuery = resolvedCanteen.replace(/^The\s+/i, "");
+      const canteenRecord = await Canteen.findOne({
+        $or: [
+          { name: resolvedCanteen },
+          { name: new RegExp(`^${resolvedCanteen}$`, "i") },
+          { name: new RegExp(`^The ${normalizedQuery}$`, "i") },
+          { name: new RegExp(`^${normalizedQuery}$`, "i") },
+        ],
+      });
+
+      if (canteenRecord) {
+        resolvedCanteen = canteenRecord.name;
+      }
+    } catch (dbErr) {
+      console.error("Canteen resolution database error:", dbErr.message);
+    }
+
+    const items = await Menu.find({ canteen: resolvedCanteen, isAvailable: true })
       .sort({ category: 1, name: 1 })
       .lean();
 
-    res.status(200).json({ canteen, items });
+    res.status(200).json({ canteen: resolvedCanteen, items });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
